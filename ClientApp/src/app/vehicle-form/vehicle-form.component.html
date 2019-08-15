@@ -1,6 +1,8 @@
 <h1>New Vehicle</h1>
 
 <form>
+
+  <!--Select make-->
   <div class="form-group">
     <label for="make">Make</label>
     <select id="make" class="form-control" (change)="onMakeChange($event.target.value)">
@@ -9,6 +11,7 @@
     </select>
   </div>
 
+  <!--Select model-->
   <div class="form-group">
     <label for="model">Model</label>
     <select id="model" class="form-control">
@@ -16,4 +19,13 @@
       <option *ngFor="let m of models" value="{{ m.id }}">{{ m.name }}</option>
     </select>
   </div>
+
+  <!--Select features-->
+  <h2>Features</h2>
+  <div *ngFor="let f of features" class="checkbox">
+    <label for="feature{{ f.id }}">
+      <input type="checkbox" id="feature{{ f.id }}"> {{ f.name }}
+    </label>
+  </div>
+
 </form>
