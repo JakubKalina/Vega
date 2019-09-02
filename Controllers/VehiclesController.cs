@@ -1,6 +1,8 @@
+using System;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using vega.Controllers.Resources;
 using vega.Models;
 using vega.Persistence;
@@ -24,9 +26,50 @@ namespace vega.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateVehicle([FromBody]VehicleResource vehicleResource) 
         {
-            var vehicle = mapper.Map<VehicleResource, Vehicle>(vehicleResource);
+            // Checking data annotations
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
 
+            // Businness rule annotation
+            /* 
+            if (true)
+            {
+                // Set the key and the message of the error
+                ModelState.AddModelError("...", "error");
+                return BadRequest(ModelState);
+            }
+            */
+/* 
+            var model = await context.Models.FindAsync(vehicleResource.ModelId);
+            if (model == null )
+            {
+                ModelState.AddModelError("ModelId", "Invalid model Id");
+                return BadRequest(ModelState);
+            }
+*/
+
+            var vehicle = mapper.Map<VehicleResource, Vehicle>(vehicleResource);
+            vehicle.LastUpdate = DateTime.Now;
             context.Vehicles.Add(vehicle);
+            await context.SaveChangesAsync();
+
+            var result = mapper.Map<Vehicle, VehicleResource>(vehicle);
+            return Ok(result);
+        }
+
+
+        
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateVehicle(int id, [FromBody]VehicleResource vehicleResource) 
+        {
+            // Checking data annotations
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var vehicle = await context.Vehicles.Include(v => v.Features).SingleOrDefaultAsync(v => v.Id == id);
+            mapper.Map<VehicleResource, Vehicle>(vehicleResource, vehicle);
+            vehicle.LastUpdate = DateTime.Now;
+
             await context.SaveChangesAsync();
 
             var result = mapper.Map<Vehicle, VehicleResource>(vehicle);
